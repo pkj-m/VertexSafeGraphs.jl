@@ -46,6 +46,38 @@ end
     end
 end
 
+@testset "Edge addition" begin
+    Random.seed!(45)
+    nv = 10
+    inner = CompleteGraph(nv)
+    g = VSafeGraph(inner)
+    nea = 0         #number of edges added
+    nrv = 0         #number of removed vertices
+    neo = LG.ne(g)  #original number of edges
+    for _ in 1:5
+        removed_ok = LG.rem_vertex!(g, rand(1:nv))
+        if !removed_ok
+            continue
+        end
+        nrv += 1
+    end
+    ne = length(edges(g))   #new number of edges
+    for _ in 1:10
+        v1 = rand(1:nv)
+        v2 = rand(1:nv)
+        while v2 == v1
+            v2 = rand(1:nv)
+        end
+        added_ok = add_edge!(g, v1, v2)
+        if added_ok
+            nea += 1
+        end
+        
+        @test LG.ne(inner) == neo
+        @test LG.ne(g) == nv + nea
+    end
+end
+
 @testset "Generic LG algorithms work" begin
     nv = 45
     inner = LG.CompleteGraph(nv)
